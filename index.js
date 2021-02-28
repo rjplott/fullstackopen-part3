@@ -73,15 +73,13 @@ app.get("/api/persons/:id", (request, response) => {
 });
 
 app.delete("/api/persons/:id", (request, response) => {
-  const id = Number(request.params.id);
-
-  if (!id) {
-    response.status(404).end();
-  } else {
-    persons = persons.filter((person) => person.id !== id);
-    response.status(204).end();
-    console.log(persons);
-  }
+  Person.findByIdAndRemove(request.params.id)
+    .then((res) => {
+      response.status(204).end();
+    })
+    .catch((err) => {
+      console.log(err.message);
+    });
 });
 
 const generateId = () => {
