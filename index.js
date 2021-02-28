@@ -71,21 +71,6 @@ app.post("/api/persons", (request, response, next) => {
     number: request.body.number,
   });
 
-  if (!newPerson.name)
-    return response.status(400).json({
-      error: "Name must not be missing",
-    });
-
-  if (!newPerson.number)
-    return response.status(400).json({
-      error: "Number must not be missing",
-    });
-
-  if (persons.find((person) => person.name === newPerson.name))
-    return response.status(400).json({
-      error: "Name must be unique",
-    });
-
   newPerson
     .save()
     .then((person) => response.json(person))
