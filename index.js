@@ -51,42 +51,44 @@ let persons = [
   },
 ];
 
-app.get("/info", (request, response) => {
-  Person.find({}).then((persons) => {
-    const date = new Date();
-    const information = `Phonebook has information on ${persons.length} people`;
-    return response.send(`
+app.get("/info", (request, response, next) => {
+  Person.find({})
+    .then((persons) => {
+      const date = new Date();
+      const information = `Phonebook has information on ${persons.length} people`;
+      return response.send(`
     <div>${information}</div>
     <div>${date}</div>
   `);
-  });
+    })
+    .catch((error) => next(error));
 });
 
-app.get("/api/persons", (request, response) => {
-  Person.find({}).then((persons) => response.json(persons));
+app.get("/api/persons", (request, response, next) => {
+  Person.find({})
+    .then((persons) => response.json(persons))
+    .catch((error) => next(error));
 });
 
-app.get("/api/persons/:id", (request, response) => {
-  Person.findById(request.params.id).then((person) => {
-    response.json(person);
-  });
+app.get("/api/persons/:id", (request, response, next) => {
+  Person.findById(request.params.id)
+    .then((person) => {
+      response.json(person);
+    })
+    .catch((error) => next(error));
 });
 
-app.delete("/api/persons/:id", (request, response) => {
+app.delete("/api/persons/:id", (request, response, next) => {
   Person.findByIdAndRemove(request.params.id)
     .then((res) => {
       response.status(204).end();
     })
     .catch((err) => {
-      console.log(err.message);
+      next(err);
     });
 });
 
-const generateId = () => {
-  return Math.round(Math.random() * 10000000);
-};
-
-app.post("/api/persons", (request, response) => {
+app.post("/api/persons", (request, response, next) => {
   const newPerson = new Person({
     name: request.body.name,
     number: request.body.number,
@@ -107,8 +109,28 @@ app.post("/api/persons", (request, response) => {
       error: "Name must be unique",
     });
 
-  newPerson.save().then((person) => response.json(person));
+  newPerson
+    .save()
+    .then((person) => response.json(person))
+    .catch((err) => next(err));
 });
+
+const unknownEndpoint = (request, response) =>
+  response.status(404).send({ error: "unknown endpoint" });
+
+app.use(unknownEndpoint);
+
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message);
+
+  if (error.name === "CastError") {
+    return response.status(400).send({ error: "Malformed ID" });
+  }
+
+  next(error);
+};
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3001;
 
