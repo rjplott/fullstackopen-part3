@@ -21,3 +21,13 @@ Content-Type: application/json
   "name": "Barto Lameo",
   "number": "344-555-3345"
 }
+
+###
+
+PUT http://localhost:3001/api/persons/603ad6d8b2abe420efbbb74c
+Content-Type: application/json
+
+{
+  "name": "John Smith",
+  "number": "344-555-3345"
+}
