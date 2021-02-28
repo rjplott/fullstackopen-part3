@@ -89,10 +89,10 @@ const generateId = () => {
 };
 
 app.post("/api/persons", (request, response) => {
-  const newPerson = {
-    ...request.body,
-    id: generateId(),
-  };
+  const newPerson = new Person({
+    name: request.body.name,
+    number: request.body.number,
+  });
 
   if (!newPerson.name)
     return response.status(400).json({
@@ -109,8 +109,7 @@ app.post("/api/persons", (request, response) => {
       error: "Name must be unique",
     });
 
-  persons = persons.concat(newPerson);
-  response.json(newPerson);
+  newPerson.save().then((person) => response.json(person));
 });
 
 const PORT = process.env.PORT || 3001;
