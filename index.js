@@ -112,7 +112,10 @@ app.post("/api/persons", (request, response, next) => {
   newPerson
     .save()
     .then((person) => response.json(person))
-    .catch((err) => next(err));
+    .catch((err) => {
+      console.log(err);
+      next(err);
+    });
 });
 
 app.put("/api/persons/:id", (request, response, next) => {
@@ -133,10 +136,12 @@ const unknownEndpoint = (request, response) =>
 app.use(unknownEndpoint);
 
 const errorHandler = (error, request, response, next) => {
-  console.error(error.message);
+  console.error(error.name);
 
   if (error.name === "CastError") {
     return response.status(400).send({ error: "Malformed ID" });
+  } else if (error.name === "ValidationError") {
+    return response.status(400).json(error.message);
   }
 
   next(error);
